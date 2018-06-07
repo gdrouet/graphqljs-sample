@@ -10,7 +10,7 @@ let schema = buildSchema(`
        """Find all products"""
        findAllProducts(
             """Exclude products without enough stock"""
-            minQuantity: Int! = 0
+            minQuantity: Int = 0
        ): [Product]
     }
     
@@ -57,17 +57,28 @@ class ProductService {
 class ProductResolver {
     constructor(id) {
         this.id = id;
-        this.stock = Math.floor(Math.random()*10+1);
+        this.stock = Math.floor(Math.random() * 10 + 1);
+    }
+
+    danger(origin) {
+        console.log(Math.random());
+        if (Math.random() < .25) {
+            throw new Error(origin);
+        };
     }
 
     quantity() {
+        this.danger("without promise");
         console.log(`Resolving quantity of product with ID ${this.id}`);
         return this.stock;
     }
 
     imageUrl() {
-        console.log(`Resolving imageUrl of product with ID ${this.id}`);
-        return "http://goo.gl/img.png";
+        return new Promise(resolve => {
+            this.danger("within promise");
+            console.log(`Resolving imageUrl of product with ID ${this.id}`);
+            resolve("http://goo.gl/img.png");
+        });
     }
 
     price({currencyFormat}) {
